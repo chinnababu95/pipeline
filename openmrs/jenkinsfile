@@ -1,16 +1,19 @@
-node{
-
-   stage ('scm'){
-     // git clone 
-     git 'https://github.com/openmrs/openmrs-core.git'  
-    }
-	stage ('build package') {
-	  // mvn package
-      sh 'sudo mvn package'
-	}
-	stage ('archiveing') {
-	  // archive artifact
-	  archiveArtifacts 'target/**/*'
-    }
-	
-}
+node {
+ stage('SCM') {
+ git 'https://github.com/openmrs/openmrs-core.git'
+ }
+ stage ('build the packages') { 
+ sh 'mvn package' 
+ } 
+ stage('SonarQube analysis') { 
+ // performing sonarqube analysis with "withSonarQubeENV(<Name of Server configured in Jenkins>)" 
+ withSonarQubeEnv('sonar') {
+ // requires SonarQube Scanner for Maven 3.2+ 
+ sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar' 
+ }
+ }
+ stage ('archiveing') {
+ // archive artifact
+ archiveArtifacts 'target/**/*'
+ }
+ }
